@@ -25,6 +25,13 @@ VALID_STATUSES = {
     "SUSPENDED",
 }
 
+def _readable_phase(design: dict) -> str:
+    """The API returns ["NA"] for non-drug studies, which reads like a
+    missing value. Spell it out so the model can't mistake it for status."""
+    phases = design.get("phases", [])
+    if not phases or phases == ["NA"]:
+        return "Not applicable (this study is not testing a drug)"
+    return ", ".join(phases)
 
 # --- Tool 1: search trials (ClinicalTrials.gov) ---
 
