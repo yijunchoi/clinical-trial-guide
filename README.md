@@ -1,6 +1,6 @@
 # Clinical Trial Guide
 
-A chat agent that helps people find and understand clinical trials — written for
+A chat agent that helps people find and understand clinical trials, written for
 users with no medical background.
 
 ClinicalTrials.gov is the complete, free, public record of clinical research in
@@ -23,7 +23,7 @@ that person: it searches the real data, then explains it in plain English.
    that specific trial. Note that "the first one you listed" only works because
    the agent remembers the previous turn.
 
-3. **"She's already taking metformin — what are the side effects?"**
+3. **"She's already taking metformin; what are the side effects?"**
    Looks up the official FDA label for the drug and summarizes the warnings.
 
 ## The four tools
@@ -39,7 +39,7 @@ Three tools call live external APIs. Neither API requires a key, so there are no
 secrets in this repository.
 
 `explain_trial_term` is the original tool. Gemini already knows what "Phase 2"
-means — the point of the tool is *control*. Without it the model improvises a
+means; the point of the tool is *control*. Without it the model improvises a
 different explanation every time, sometimes drifting back into jargon. With it,
 every user gets the same wording, written deliberately for someone who is
 frightened and not in a state to absorb technical language. The glossary covers
@@ -49,8 +49,8 @@ sponsor, enrollment, eligibility.
 ## How it works
 
 `app.py` holds the agent loop. Each turn, the whole conversation plus the tool
-descriptions go to Gemini. If the model asks for a tool, the harness — not the
-model — runs it, appends the result, and loops again, until the model answers
+descriptions go to Gemini. If the model asks for a tool, the harness, not the
+model - runs it, appends the result, and loops again, until the model answers
 with text instead of a request. Sessions are stored per `session_id`, so the
 agent follows the conversation and separate users never see each other's.
 
