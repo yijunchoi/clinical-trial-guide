@@ -50,7 +50,7 @@ sponsor, enrollment, eligibility.
 
 `app.py` holds the agent loop. Each turn, the whole conversation plus the tool
 descriptions go to Gemini. If the model asks for a tool, the harness, not the
-model - runs it, appends the result, and loops again, until the model answers
+model, runs it, appends the result, and loops again, until the model answers
 with text instead of a request. Sessions are stored per `session_id`, so the
 agent follows the conversation and separate users never see each other's.
 
