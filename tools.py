@@ -105,6 +105,7 @@ def search_clinical_trials(condition: str, location: str = "", status: str = "RE
             "title": ident.get("briefTitle"),
             "status": protocol.get("statusModule", {}).get("overallStatus"),
             "phase": _readable_phase(design),
+            "study_type": design.get("studyType"),
             "enrollment": design.get("enrollmentInfo", {}).get("count"),
             "sponsor": protocol.get("sponsorCollaboratorsModule", {})
                                .get("leadSponsor", {}).get("name"),
@@ -164,6 +165,7 @@ def get_trial_details(nct_id: str) -> str:
         "summary": protocol.get("descriptionModule", {}).get("briefSummary", "")[:1200],
         "status": protocol.get("statusModule", {}).get("overallStatus"),
         "phase": _readable_phase(protocol.get("designModule", {})),
+        "study_type": protocol.get("designModule", {}).get("studyType"),
         "conditions": protocol.get("conditionsModule", {}).get("conditions", []),
         "interventions": interventions,
         "who_can_join": {
