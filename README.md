@@ -9,7 +9,7 @@ lands on it and immediately hits words like *interventional*, *double-blind* and
 *exclusion criteria*, and gives up. This agent sits between that database and
 that person: it searches the real data, then explains it in plain English.
 
-**Live app:** <!-- paste your Cloud Run URL here after deploying -->
+**Live app:** <https://clinical-trial-guide-git-900827490817.europe-west1.run.app>
 
 ## Try these three
 

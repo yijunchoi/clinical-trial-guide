@@ -48,7 +48,9 @@ def search_clinical_trials(condition: str, location: str = "", status: str = "RE
     params = {
         "query.cond": condition,
         "filter.overallStatus": status,
-        "pageSize": 5,
+        # query.locn only ranks results by location, it does not filter them,
+        # so we over-fetch and filter by site ourselves below.
+        "pageSize": 30,
         "countTotal": "true",
     }
     if location:
@@ -77,27 +79,50 @@ def search_clinical_trials(condition: str, location: str = "", status: str = "RE
         design = protocol.get("designModule", {})
         locations = protocol.get("contactsLocationsModule", {}).get("locations", [])
 
-        # A big trial can list 700 sites. Send the model a handful, not all of them.
-        cities = []
-        for site in locations[:40]:
+        # Check every site, not just the first few: a big trial can list 700
+        # sites, and the one near the user may be far down the list.
+        nearby, others = [], []
+        seen = set()
+        for site in locations:
             label = ", ".join(p for p in (site.get("city"), site.get("state")) if p)
-            if label and label not in cities:
-                cities.append(label)
+            if not label or label in seen:
+                continue
+            seen.add(label)
+            # Match on country too, but leave it out of the label to keep it short.
+            place = f"{label}, {site.get('country', '')}".lower()
+            if location and location.lower() in place:
+                nearby.append(label)
+            else:
+                others.append(label)
+
+        if location and not nearby:
+            continue
+        # Put the user's sites first, so they survive the cut to 8 below.
+        cities = nearby + others
 
         results.append({
             "nct_id": ident.get("nctId"),
             "title": ident.get("briefTitle"),
             "status": protocol.get("statusModule", {}).get("overallStatus"),
-            "phase": ", ".join(design.get("phases", [])) or "Not applicable",
+            "phase": _readable_phase(design),
             "enrollment": design.get("enrollmentInfo", {}).get("count"),
             "sponsor": protocol.get("sponsorCollaboratorsModule", {})
                                .get("leadSponsor", {}).get("name"),
             "example_sites": cities[:8],
             "total_sites": len(locations),
         })
+        if len(results) >= 5:
+            break
+
+    if not results:
+        return json.dumps({
+            "result": f"No trials were found with a site in '{location}'.",
+            "hint": "Try a nearby larger city, the state name, or search with no location.",
+            "searched_for": {"condition": condition, "location": location, "status": status},
+        })
 
     return json.dumps({
-        "total_matching": data.get("totalCount"),
+        "matched_condition": data.get("totalCount"),
         "showing": len(results),
         "trials": results,
     })
@@ -138,7 +163,7 @@ def get_trial_details(nct_id: str) -> str:
         "title": protocol.get("identificationModule", {}).get("briefTitle"),
         "summary": protocol.get("descriptionModule", {}).get("briefSummary", "")[:1200],
         "status": protocol.get("statusModule", {}).get("overallStatus"),
-        "phase": ", ".join(protocol.get("designModule", {}).get("phases", [])) or "Not applicable",
+        "phase": _readable_phase(protocol.get("designModule", {})),
         "conditions": protocol.get("conditionsModule", {}).get("conditions", []),
         "interventions": interventions,
         "who_can_join": {
@@ -317,8 +342,10 @@ TOOLS = [
                     },
                     "location": {
                         "type": "string",
-                        "description": "Optional. A city, state or country to search near, "
-                                       "e.g. 'New York' or 'Westchester County'.",
+                        "description": "Optional. A city, state or country to search near. "
+                                       "Spell out the full name, e.g. 'New York' not 'NY' -- "
+                                       "ClinicalTrials.gov stores full state names, so "
+                                       "abbreviations match the wrong cities.",
                     },
                     "status": {
                         "type": "string",
