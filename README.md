@@ -11,7 +11,7 @@ ClinicalTrials.gov is a free, public register of clinical studies run by the U.S
 1. **"My mother was just diagnosed with type 2 diabetes. Are there any trials
    recruiting near New York?"**
    Searches ClinicalTrials.gov and returns real recruiting trials with their
-   locations and NCT ID (National Clinical Trial identifier; assigned to each clinical study registered on ClinicalTrials.gov)
+   locations and NCT ID (National Clinical Trial identifier, assigned to each clinical study registered on ClinicalTrials.gov).
 
 2. **"What does Phase 3 mean, and could she join the first one you listed?"**
    Explains the term from the glossary, then pulls the eligibility rules for

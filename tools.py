@@ -48,8 +48,7 @@ def search_clinical_trials(condition: str, location: str = "", status: str = "RE
     params = {
         "query.cond": condition,
         "filter.overallStatus": status,
-        # query.locn only ranks results by location, it does not filter them,
-        # so we over-fetch and filter by site ourselves below.
+        # query.locn only ranks results by location, it does not filter them, so we over-fetch and filter by site ourselves below.
         "pageSize": 30,
         "countTotal": "true",
     }
@@ -79,8 +78,7 @@ def search_clinical_trials(condition: str, location: str = "", status: str = "RE
         design = protocol.get("designModule", {})
         locations = protocol.get("contactsLocationsModule", {}).get("locations", [])
 
-        # Check every site, not just the first few: a big trial can list 700
-        # sites, and the one near the user may be far down the list.
+        # Check every site, not just the first few: a big trial can list 700 sites, and the one near the user may be far down the list.
         nearby, others = [], []
         seen = set()
         for site in locations:
@@ -235,7 +233,7 @@ def check_drug_warnings(drug_name: str):
     })
 
 
-# --- Tool 4: the jargon translator (no API -- definitions live in this file) ---
+# --- Tool 4: the jargon translator (no API, definitions live in this file) ---
 
 GLOSSARY = {
     "phase 1": "The very first time a drug is tried on people — usually 20 to 100 of them. They're checking "
@@ -267,8 +265,7 @@ GLOSSARY = {
     "eligibility criteria": "The checklist of who can and cannot join, based on age, "
                             "diagnosis, other medications, and so on.",
     "inclusion criteria": "The things you must have to join, such as a specific diagnosis or age range.",
-    "exclusion criteria": "The things that disqualify you, such as being pregnant or taking a "
-                          "conflicting medication.",
+    "exclusion criteria": "The things that disqualify you, such as being pregnant or taking a conflicting medication.",
     "healthy volunteers": "Whether people without the condition can also join. Common in "
                           "Phase 1 safety trials.",
     "nct id": "The trial's unique ID number, always starting with NCT. Think of it as the "
