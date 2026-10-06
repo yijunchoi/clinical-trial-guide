@@ -1,22 +1,17 @@
 # Clinical Trial Guide
 
-A chat agent that helps people find and understand clinical trials, written for
-users with no medical background.
+A chat agent that helps people find and understand clinical trials, designed for users who have no medical background.
 
-ClinicalTrials.gov is the complete, free, public record of clinical research in
-the US. It is also written for researchers. Someone who was diagnosed last week
-lands on it and immediately hits words like *interventional*, *double-blind* and
-*exclusion criteria*, and gives up. This agent sits between that database and
-that person: it searches the real data, then explains it in plain English.
+ClinicalTrials.gov is a free, public register of clinical studies run by the U.S. National Institutes of Health, covering trials in the United States and abroad, and it is written for researchers. An individual who was diagnosed last week will land on the site, find terms like interventional, double-blind and exclusion criteria, and get frustrated. This chat agent acts as an intermediary between the database and the individual: it fetches the real records and explains them in plain language. Drug safety information comes from the FDA's own labels, through openFDA.
 
 **Live app:** <https://clinical-trial-guide-git-900827490817.europe-west1.run.app>
 
-## Try these three
+## Three sample queries to test
 
 1. **"My mother was just diagnosed with type 2 diabetes. Are there any trials
    recruiting near New York?"**
    Searches ClinicalTrials.gov and returns real recruiting trials with their
-   locations and NCT IDs.
+   locations and NCT ID (National Clinical Trial identifier; assigned to each clinical study registered on ClinicalTrials.gov)
 
 2. **"What does Phase 3 mean, and could she join the first one you listed?"**
    Explains the term from the glossary, then pulls the eligibility rules for
@@ -35,39 +30,28 @@ that person: it searches the real data, then explains it in plain English.
 | `check_drug_warnings` | openFDA drug label API | Official FDA warnings and side effects for an approved drug |
 | `explain_trial_term` | Local glossary | Translates 26 clinical-trial terms into plain English |
 
-Three tools call live external APIs. Neither API requires a key, so there are no
-secrets in this repository.
+Three of the four tools call live external APIs, and neither API requires a key.
 
-`explain_trial_term` is the original tool. Gemini already knows what "Phase 2"
-means; the point of the tool is *control*. Without it the model improvises a
-different explanation every time, sometimes drifting back into jargon. With it,
-every user gets the same wording, written deliberately for someone who is
-frightened and not in a state to absorb technical language. The glossary covers
-the exact vocabulary the other three tools put on screen: phase, status,
-sponsor, enrollment, eligibility.
+`explain_trial_term` is my original tool. Gemini already knows what "Phase 2" means; the aim of this tool is to keep control over the wording. Without it, the model gives an explanation that differs every time and occasionally slips back into jargon. With this tool, every user gets the same explanation, written for someone who does not know the terminology. The glossary covers the vocabulary the other three tools put on screen, such as phase, status, sponsor, enrollment, eligibility.
 
 ## How it works
 
-`app.py` holds the agent loop. Each turn, the whole conversation plus the tool
-descriptions go to Gemini. If the model asks for a tool, the harness, not the
-model, runs it, appends the result, and loops again, until the model answers
-with text instead of a request. Sessions are stored per `session_id`, so the
-agent follows the conversation and separate users never see each other's.
+`app.py` holds the agent loop. On each turn, the full conversation and the tool descriptions go to Gemini. When the model asks for a tool, the harness is what runs it, appends the result, and sends the conversation back for another round. The loop ends once the model answers with text rather than another tool request. Each conversation is stored under its own session_id, so the agent remembers what came before and two users never see each other's chats.
 
-Every tool returns a JSON string, and returns `{"error": ...}` on failure rather
-than raising. An exception would kill the agent loop mid-conversation; an error
-message lets the model recover, apologize, or try a different approach.
+Every tool returns a JSON string, and on failure it returns {"error": ...} rather than raising an exception. An exception would end the loop in the middle of a conversation; an error message lets the model explain what went wrong or try a different approach.
 
 ## Running it locally
 
+Most people should just use the live app above. To run your own copy, you need
+a GCP project with billing enabled and the Vertex AI API turned on.
+
 ```bash
+gcloud auth application-default login
 uv run app.py
 ```
 
 Then open http://localhost:8000
 
-Requires a GCP project with billing and the Vertex AI API enabled, and
-`gcloud auth application-default login`.
 
 ## Built with
 
@@ -76,6 +60,5 @@ Google Cloud Run with continuous deployment from GitHub.
 
 ## Not medical advice
 
-This agent surfaces public information and explains terminology. It does not
-recommend treatments and does not advise anyone to join a trial. Those
-conversations belong with a doctor.
+This agent shows public information and explains terminology. It does not
+recommend treatments and does not advise anyone to join a trial. These issues should be discussed with a doctor.
